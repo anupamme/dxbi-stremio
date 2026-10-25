@@ -3,6 +3,7 @@
 
 usage: intro_audio.py OUT.wav
 """
+import os
 import sys
 import wave
 
@@ -147,8 +148,13 @@ R *= g
 rms_db = 20 * np.log10(np.sqrt(np.mean((L ** 2 + R ** 2) / 2)) + 1e-12)
 print(f"peak -1.5 dBFS, rms {rms_db:.1f} dBFS")
 
+out_path = os.path.abspath(sys.argv[1])
+cwd = os.path.abspath(os.getcwd())
+if not out_path.lower().endswith(".wav") or os.path.commonpath([out_path, cwd]) != cwd:
+    sys.exit("error: output path must be a .wav file inside the current directory")
+
 pcm = (np.stack([L, R], axis=1) * 32767).astype(np.int16)
-with wave.open(sys.argv[1], "wb") as w:
+with wave.open(out_path, "wb") as w:
     w.setnchannels(2)
     w.setsampwidth(2)
     w.setframerate(SR)
